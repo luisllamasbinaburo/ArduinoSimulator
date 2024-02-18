@@ -3265,6 +3265,37 @@ const jscppIncludes = {
 				return rt.val(rt.primitiveType("unsigned long"), val);
 			};
 			rt.regFunc(_jscpp_time, "global", "jscpp_time", [],  rt.primitiveType("unsigned long"));
+
+			const type = rt.newClass("Stringo", [{
+				name: "x",
+				type: rt.intTypeLiteral,
+				initialize(rt, _this) { return rt.val(rt.intTypeLiteral, 0, true); }
+			}, {
+				name: "y",
+				type: rt.intTypeLiteral,
+				initialize(rt, _this) { return rt.val(rt.intTypeLiteral, 0, true); }
+			}
+			]);
+			const typeSig = rt.getTypeSignature(type);
+			rt.types[typeSig].father = "object";
+	
+			const _plusX = function (rt, _this, a) {
+				console.log(_this);
+				const newValue = (_this.v.members["x"].v) + a.v;
+				return rt.val(rt.intTypeLiteral, newValue, false);
+			};
+	
+			rt.regFunc(_plusX, type, "plusX", [rt.intTypeLiteral], rt.intTypeLiteral);
+	
+			let _userCallback;
+			const _callback = function* (rt, _this, f, v) {
+				_userCallback = f;
+				const r = yield* f.v.target.v.target(rt, null, v);
+				return r;
+			}
+			rt.regFunc(_callback, type, "callback", [rt.functionPointerType(rt.intTypeLiteral, [rt.normalPointerType(rt.intTypeLiteral)]),
+				rt.normalPointerType(rt.intTypeLiteral)
+			], rt.intTypeLiteral);
 		}
 	}
 }

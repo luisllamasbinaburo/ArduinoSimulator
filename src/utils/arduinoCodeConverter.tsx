@@ -40,8 +40,8 @@ const bool HIGH = true;
 #define clockCyclesToMicroseconds(a) ()
 #define microsecondsToClockCycles(a) ()
 
-#define lowByte(w) ((uint8_t) ((w) & 0xff))
-#define highByte(w) ((uint8_t) ((w) >> 8))
+#define lowByte(w) ((char) ((w) & 0xff))
+#define highByte(w) ((char) ((w) >> 8))
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))
@@ -303,33 +303,22 @@ int main(){
 export const convertSketch = (sketch: string) => {
   // FINDING AND REPLACING ALL THE CALLS TO THE SERIAL.BEGIN METHOD
   sketch = sketch.replace(
-    /(?=(?:[^"]*"[^"]*")*[^"]*$)\bSerial\.begin\b/g,
-    "_Serial_Begin"
-  )
+    /(?=(?:[^"]*"[^"]*")*[^"]*$)\bSerial\.begin\b/g, "_Serial_Begin" )
 
   // FINDING AND REPLACING ALL THE CALLS TO THE SERIAL.PRINT METHOD
   sketch = sketch.replace(
-    /(?=(?:[^"]*"[^"]*")*[^"]*$)(\bSerial\.print\b)(.*?\);)/g,
-    "cout <<$2"
-  )
+    /(?=(?:[^"]*"[^"]*")*[^"]*$)(\bSerial\.print\b)(.*?\);)/g, "cout <<$2" )
 
   // FINDING AND REPLACING ALL THE CALLS TO THE SERIAL.PRINTLN METHOD
-  sketch = sketch.replace(
-    /(?=(?:[^"]*"[^"]*")*[^"]*$)(\bSerial\.println\b)(.*?\);)/g,
-    'cout <<$2cout << "<br />";'
-  )
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)(\bSerial\.println\b)(.*?\);)/g, 'cout <<$2cout << "<br />";' )
 
   // FINDING AND REPLACING ALL THE CALLS TO THE SERIAL.AVAILABLE METHOD
-  sketch = sketch.replace(
-    /(?=(?:[^"]*"[^"]*")*[^"]*$)\bSerial\.available\b/g,
-    "_Serial_Available"
-  )
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\bSerial\.available\b/g, "_Serial_Available")
 
   // FINDING AND REPLACING ALL THE CALLS TO THE SERIAL.READ METHOD
-  sketch = sketch.replace(
-    /(?=(?:[^"]*"[^"]*")*[^"]*$)\bSerial\.read\b/g,
-    "_Serial_Read"
-  )
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\bSerial\.read\b/g, "_Serial_Read" )
+
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)(\bSerial\.write\b)(.*?\);)/g, 'cout << $2cout << "<br />";' )
 
   // REGEX FOR CHECKING IF THE EEPROM IS GOING TO BE INCLUDED
   const regexEEPROMLibrary = new RegExp(/^#include.*?<EEPROM.h>/gm)
@@ -402,6 +391,10 @@ export const convertSketch = (sketch: string) => {
   sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\bvolatile double \b/g,"double ")
   sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\bvolatile String \b/g,"String ")
   sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\bvolatile char \b/g, "char ")
+
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\bsize_t \b/g, "int ")
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\buint8_t \b/g, "int ")
+  sketch = sketch.replace(/(?=(?:[^"]*"[^"]*")*[^"]*$)\buint16_t \b/g, "int ")
   
   sketch= sketch.replace(/attachInterrupt\(digitalPinToInterrupt\([^)]+\),\s*[ ]*/g, "$&&");
 
